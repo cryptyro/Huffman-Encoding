@@ -4,8 +4,8 @@ This project provides an implementation of Huffman encoding and decoding algorit
 ## Features
 - Build a Huffman Tree based on character frequencies.
 - Generate Huffman Codes from the Huffman Tree.
-- Encode a given input string using the generated Huffman Codes.
-- Decode a given Huffman encoded string back to the original string.
+- Encode a given input file using the generated Huffman Codes.
+- Decode a given Huffman encoded file back to the original file.
 - Simple and efficient algorithms suitable for educational purposes.
 
 ## Getting Started
@@ -15,8 +15,8 @@ This project provides an implementation of Huffman encoding and decoding algorit
 ### Installation
 Clone the repository to your local machine:
 ```bash
-git clone https://github.com/yourusername/huffman-encoding-decoding.git
-cd huffman-encoding-decoding
+git clone https://github.com/yourusername/Huffman-Encoding.git
+cd Huffman-Encoding
 ```
 No additional libraries are required for this project.
 
@@ -28,7 +28,7 @@ No additional libraries are required for this project.
 ## HuffmanCoding Class
 ### Methods
 - `parse_file(filename)` This function reads a binary file and counts the occurrences of each characterwithin the file. It returns an array where the index corresponds to the character value (0 to 255), and the value at each index represents the count of that character.
-- `buildHuffmanTree(frequencyArray)`: Takes a frequency array, then build the Huffman tree on it and returns the root of the Huffman Tree.
+- `buildHuffmanTree(frequencyArray)` This function constructs a Huffman tree based on the given frequency array. It uses a priority queue (min-heap) to build the tree by repeatedly merging the two nodes with the smallest frequencies until only one node remains.
 - `Inorder(root, code, huffmanCodes)`: Takes the root of the Huffman Tree and returns the HuffmanCodes stored in a vector of string.
 - `compress(infilename, outfilename, huffmanCodes)`: Takes a input file and returns the encoded data along with the Huffman Tree.
     decode(encoded_data, tree): Takes the encoded data and the Huffman Tree and returns the decoded original string.
