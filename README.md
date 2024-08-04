@@ -31,9 +31,9 @@ No additional libraries are required for this project.
 - `buildHuffmanTree(frequencyArray)` This function constructs a Huffman tree based on the given frequency array. It uses a priority queue (min-heap) to build the tree by repeatedly merging the two nodes with the smallest frequencies until only one node remains.
 - `Inorder(root, code, huffmanCodes)` This function recursively traverses the Huffman tree in an inorder manner to generate Huffman codes.
 - `generate_header(huffmanCodes)` Generates a header string containing Huffman coding information for compression.
-#### Header Format
-  1. **Number of unique characters (1 byte)**
-  2. **For each unique character**:
+  *Header Format*
+  - Number of unique characters (1 byte)
+  - For each unique character:
       - Character (1 byte)
       - Length of Huffman code (1 byte)
       - Huffman code (min: 1 byte, max: 255bytes)
