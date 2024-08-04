@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <cstdio>
+#include <fstream>
 #define ll unsigned long long int
 #define MAX_CHAR 256 // Assuming ASCII characters
 
@@ -28,17 +28,34 @@ struct Node {
     }
 };
 
+/** Function to parses the file for character count **/
+vector<ll> parse_file(const char* filename) {
+	vector<ll> char_count(MAX_CHAR, 0); // Initialize all counts to 0
+	// Open the input file in binary read mode
+    ifstream file(filename, ios::binary);
+    if (!file) {
+        cerr << "Error opening input file" << endl;
+        exit(EXIT_FAILURE);
+    }
+	// Read the file character by character until EOF
+    unsigned char character;
+    while (file.read(reinterpret_cast<char*>(&character), sizeof(character))) {
+        char_count[character]++;
+        infile_size++; //Get the inputflesize
+    }
+    file.close();// Close the file
+    return char_count; // Return the array of character counts
+}
 
 /** Function to build the Huffman tree **/
 Node* buildHuffmanTree(const vector<ll>& frequencyArray) {
-    vector<Node*> nodes;
-	// Create leaf nodes
+    vector<Node*> nodes;// Vector to hold leaf nodes based on character frequencies
+	// Create leaf nodes for characters with non-zero frequencies
     for (int i = 0; i < MAX_CHAR; ++i) {
-        if (frequencyArray[i] > 0) {
+        if (frequencyArray[i] > 0)
             nodes.push_back(new Node(static_cast<char>(i), frequencyArray[i]));
-        }
     }
-    // Merge nodes until there's only one node left
+    // Merge nodes until there's only one node (the root) remains
     while (nodes.size() > 1) {
         // Find two nodes with the lowest frequencies
         Node* smallest1 = nodes[0];
@@ -67,79 +84,114 @@ Node* buildHuffmanTree(const vector<ll>& frequencyArray) {
     return nodes.front();
 }
 
-
-/*Function to generate and print huffman codes for each character.*/
+/**Function to generate and print huffman codes for each character.**/
 void Inorder(Node *root, string code, vector<string>& huffmanCodes) {;
-    if (root) {
+    if (root) { // Check if the current node is not null
+        // Traverse the left subtree, appending '0' to the current code
         code.push_back('0');
         Inorder(root->left, code, huffmanCodes);
+        // Backtrack by removing the last character ('0') from the code
         code.pop_back();
+        
+         // If the current node is a leaf node (i.e., it has no left or right child)
         if (root->left == nullptr && root->right == nullptr) {
+        	// Store the generated Huffman code for the character at this leaf node
             huffmanCodes[(unsigned char)root->character] = code;
-            cout<<"Character: "<< root->character << "  Frequency: "<<root->frequency << "  Huffman Code: " << code << endl;
+            // Print the character, its frequency, and its Huffman code
+            cout << "Character: " << root->character
+                 << "  Frequency: " << root->frequency
+                 << "  Huffman Code: " << code << endl;
+            // Calculate the expected length of the encoded file
             explen += ((double)(root->frequency)/infile_size)* code.size();
         }
+        // Traverse the right subtree, appending '1' to the current code
         code.push_back('1');
         Inorder(root->right, code, huffmanCodes);
+        // Backtrack by removing the last character ('1') from the code
         code.pop_back();
     }
 }
 
-
-/** Function to parses the file for character count **/
-vector<ll> parse_file(const char* filename) {
-	unsigned char character;
-	vector<ll> char_count(256,0);
-	// Open the binary file in read mode
-    FILE *file = fopen( filename , "rb");
-    if (file == nullptr) {
-        perror("Error opening input file");
-        return vector<ll>();
+ 
+/**Generates a header string containing Huffman coding information for compression.**/
+string generate_header(const vector<string>& huffmanCodes) {
+    string header = "";
+    // Number of unique characters with non-zero Huffman codes
+    unsigned char UniqueCharacter = 0;
+    // Iterate over all possible ASCII characters
+    for (int i = 0; i < 256; ++i) {
+    	// Check if the character has a non-empty Huffman code
+        if (huffmanCodes[i].size()) {
+            header.push_back(i); // Add character to the header
+            header.push_back(huffmanCodes[i].size()); // Add the length of the Huffman code for the character
+            header += huffmanCodes[i];// Add the Huffman code itself
+            ++UniqueCharacter; // Increment the count of unique characters
+        }
     }
-    // Read the file character by character until EOF
-    while (fread(&character, sizeof(unsigned char), 1, file) == 1) {
-        char_count[character]++;
-        infile_size++;
-    }
-    fclose(file);
-    return char_count;
+    // Prepend the number of unique characters to the header
+    return string(1, UniqueCharacter) + header;
 }
 
-/** Determine file size **/
 
+/**Compresses a file using Huffman coding and writes the compressed data to a new file**/
+void compress(const char* infilename) {
+	vector<ll> frequencyArray = parse_file(infilename);// Step 1: Calculate character frequencies
+    Node* root = buildHuffmanTree(frequencyArray);// Step 2: Build Huffman tree
+    vector<string> huffmanCodes(MAX_CHAR);// Vector to store Huffman codes for each character
+	Inorder(root, "", huffmanCodes);// Step 3: Generate Huffman codes
+	delete root;// Clean up memory used for Huffman tree
+		
+    cout<<endl<<"Expected codelength is = "<<explen << endl;
+    cout<<endl<<endl<<"Input file size :"<<infile_size<<"bytes"<<endl;
 
-
-/** Actual compression of a file.**/
-void compress(const char* infilename, const char* outfilename, const vector<string>& huffmanCodes) {
-	unsigned char ch , fch=0 , counter=7;
-	int  i;
-	string code;
-	// Open the binary file in read mode
-    FILE *infile = fopen( infilename , "rb");
-    FILE *outfile = fopen( outfilename , "wb");
-    if (infile == nullptr) {
-        perror("Error opening input file");
+    // Create the output file name with ".encoded" suffix and open it in binary write mode
+    string outfilename = string(infilename) + ".encode";
+    ofstream ofile(outfilename, ios::binary);
+    if (!ofile) {
+        cerr << "Error opening output file" << endl;
         return;
-    }  
-    // Read the file character by character until EOF
-    while (fread(&ch, sizeof(unsigned char), 1, infile) == 1) {
+    }
+        
+    // Step 4: Write header information to the output file
+    string header = generate_header(huffmanCodes);
+    ofile.write(header.c_str(), header.size());
+
+	ifstream ifile(infilename, ios::binary);
+    if (!ifile) {
+        cerr << "Error opening input file" << endl;
+        return;
+    }
+
+	unsigned char ch, fch=0; // `ch` for reading input characters, `fch` for writing encoded bits
+	unsigned char counter = 7;    // Bit position counter (7 for the most significant bit)
+	int  i; // Index for iterating through the Huffman code
+	string code; // Huffman code corresponding to the current character
+	
+    // Read the inputfile character by character encode using Huffman codes until EOF
+    while (ifile.read(reinterpret_cast<char*>(&ch), sizeof(ch))) {
         code = huffmanCodes[ch];
         i=0;
         while(code[i] != '\0') {
-            fch = fch | ((code[i] - '0') << counter);
-            counter = (counter +7) & 7;  //Decrement from 7 down to zero, and then back again at 7
-            if(counter == 7) {
-                fputc(fch, outfile);
+            fch = fch | ((code[i] - '0') << counter);// Append the current bit to `fch`
+            counter = (counter +7) & 7;// Decrement counter from 7 to 0, then wrap around
+            if(counter == 7) {// When counter resets to 7, write the byte to the output file
+                ofile.put(fch);
                 outfile_size++;
-                fch = 0;
+                fch = 0; // Reset `fch` for the next byte
             }
             i++;
         }
     }
+    // Write any remaining bits in `fch` to the output file
     if(fch) {
-      	fputc(fch, outfile);
+      	ofile.put(fch);
       	outfile_size++;
     }
-    fclose(infile);
-    fclose(outfile);
+    // Close the input and output files
+    ifile.close();
+    ofile.close();
+    // Display the results
+    cout<<"Output file size :"<<outfile_size<<"bytes"<<endl;
+    cout<<"Compress Ratio : "<<(double)infile_size/outfile_size<<endl;
+	cout<<"Voila!! File has been successfully compressed and stored into "<<outfilename<<" with the corresponding huffman tree."<<endl;
 }
