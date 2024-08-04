@@ -1,63 +1,25 @@
+#include "encode.h"
 #include "decode.h"
 
-int main() {
-	string str1,  str2 , str3;
-	char choice;
-	cout<<"Enter 'c' to compress/encode or 'd' to decompress/decode : ";
-	cin>>choice;
+void print_usage(const char *program_name) {
+    printf("Usage: %s <mode> <inputfilename>\n", program_name);
+    printf("Modes:\n");
+    printf("  encode : Generate Huffman Encoding of the input\n");
+    printf("  decode : Decode the input with the help of Huffman tree\n");
+}
+
+int main(int argc, char* argv[]) {
+	if (argc != 3) {
+        print_usage(argv[0]);
+        return 1;
+    }
+    const char* mode = argv[1];
+    const char* inputFilename = argv[2];
 	
-    cout<< "Enter the input file name : ";
-    cin>> str1 ;
-    const char *inputFilename = str1.c_str();
+	if( mode[0] == 'c') 
+    	compress(inputFilename);
 	
-	if( choice == 'c') {
-    	// Calculate character frequencies
-		vector<ll> frequencyArray = parse_file(inputFilename);
-
-    	// Build Huffman tree
-    	Node* root = buildHuffmanTree(frequencyArray);
-
-    	// Generate Huffman codes
-    	vector<string> huffmanCodes(MAX_CHAR);
-    	Inorder(root, "", huffmanCodes);
-    	
-    	cout<<endl<<"Expected codelength is = "<<explen << endl;
-    	cout<<endl<<endl<<"Input file size :"<<infile_size<<"bytes"<<endl;
-
-    	// Write encoded data to binary file
-    	str2= str1+".encoded";
-    	const char *outputFilename = str2.c_str();
-    	compress(inputFilename , outputFilename, huffmanCodes);
-    	
-    	cout<<"Output file size :"<<outfile_size<<"bytes"<<endl;
-       	cout<<"Compress Ratio : "<<(double)infile_size/outfile_size;
-		
-		// Write header data to binary file
-		write_header(huffmanCodes, "tree.info");
-		
-		cout<<endl<<"Voila!! File has been successfully compressed and stored into "<<str2<<" with the corresponding huffman tree stored into tree.info."<<endl;
-		
-    	// Clean up memory
-	    delete root;
-	}
-	
-	if( choice == 'd') {
-	    cout<< "Enter the auxiliary file name that was created during the encoding (containing the Huffman tree) : ";
-    	cin>> str3 ;
-    	const char *auxfile = str3.c_str();
-    	str2= str1+".og";
-    	const char *outputFilename = str2.c_str();
-
-    	// Build Huffman tree
-    	Node* root = decode_header(auxfile);
-
-		// Retrieve the original data
-		decompress(inputFilename , outputFilename, auxfile);
-		
-		cout<<endl<<"Voila!! File has been successfully decoded and stored into "<<str2<<endl;
-
-    	// Clean up memory
-	    delete root;
-	}	
+	if( mode[0] == 'd')
+		decode(inputFilename);
     return 0;
 }
