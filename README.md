@@ -27,7 +27,7 @@ No additional libraries are required for this project.
 
 ## HuffmanCoding Class
 ### Methods
-- `parse_file(filename)`: Parse the file and return the character frequency stored in an array of 256 long integers.
+- `parse_file(filename)` This function reads a binary file and counts the occurrences of each characterwithin the file. It returns an array where the index corresponds to the character value (0 to 255), and the value at each index represents the count of that character.
 - `buildHuffmanTree(frequencyArray)`: Takes a frequency array, then build the Huffman tree on it and returns the root of the Huffman Tree.
 - `Inorder(root, code, huffmanCodes)`: Takes the root of the Huffman Tree and returns the HuffmanCodes stored in a vector of string.
 - `compress(infilename, outfilename, huffmanCodes)`: Takes a input file and returns the encoded data along with the Huffman Tree.
