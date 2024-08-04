@@ -31,21 +31,21 @@ No additional libraries are required for this project.
 - `buildHuffmanTree(frequencyArray)` This function constructs a Huffman tree based on the given frequency array. It uses a priority queue (min-heap) to build the tree by repeatedly merging the two nodes with the smallest frequencies until only one node remains.
 - `Inorder(root, code, huffmanCodes)` This function recursively traverses the Huffman tree in an inorder manner to generate Huffman codes.
 - `generate_header(huffmanCodes)` Generates a header string containing Huffman coding information for compression.
-  *Format:* 
-  1. Number of unique characters (1 byte)
-  2. For each unique character:
-      a. Character (1 byte)
-      b. Length of Huffman code (1 byte)
-      c. Huffman code (min: 1 byte, max: 255bytes)
-  Worst case header size: 1 + (1+1)*(1+2+3+4+5+...+255) + 1 ~ 32kb... (only happens when skewed Huffman tree is generated)
-  Best case header size: 1 + 1 + 1 + 1 + 1 = 5bytes (Happens only when a single character exists in an entire file).
+#### Header Format
+  1. **Number of unique characters (1 byte)**
+  2. **For each unique character**:
+      - Character (1 byte)
+      - Length of Huffman code (1 byte)
+      - Huffman code (min: 1 byte, max: 255bytes)
+- Worst case header size: 1 + (1+1)*(1+2+3+4+5+...+255) + 1 ~ 32kb... (only happens when skewed Huffman tree is generated)
+- Best case header size: 1 + 1 + 1 + 1 + 1 = 5bytes (Happens only when a single character exists in an entire file).
 - `compress(infilename)` Compresses a file using Huffman coding and writes the compressed data to a new file.
   The function performs the following steps:
-   1. Parses the input file to compute character frequencies.
-   2. Builds a Huffman tree based on the frequencies.
-   3. Generates Huffman codes for each character.
-   4. Writes a header containing Huffman coding information to the output file.
-   5. Encodes the input file using Huffman codes and writes the encoded data to the output file.
+     - Parses the input file to compute character frequencies.
+     - Builds a Huffman tree based on the frequencies.
+     - Generates Huffman codes for each character.
+     - Writes a header containing Huffman coding information to the output file.
+     - Encodes the input file using Huffman codes and writes the encoded data to the output file.
 - `decode(encoded_file)` Takes the encoded data and the Huffman Tree and returns the decoded original data.
 
 ### Example
